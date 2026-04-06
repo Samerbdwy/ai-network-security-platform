@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Unified Security Platform | Cisco Network Security</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>AI UNIFIED SECURITY</h1>
+                    <p>Powered by Gemini 2.5 Flash</p>
+                </div>
+            </div>
+            <div class="nav-stats">
+                <div class="stat-item">
+                    <div class="stat-value"><i class="fas fa-microchip"></i> Gemini 2.5</div>
+                    <div class="stat-label">AI Model</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value"><i class="fas fa-cisco"></i> Enterprise</div>
+                    <div class="stat-label">Ready</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-container">
+        <div class="header">
+            <h2><i class="fas fa-robot"></i> AI-Powered Network Security</h2>
+            <p>Unified platform for network discovery + Cisco configuration hardening</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('network')">
+                <i class="fas fa-network-wired"></i> Network Scanner
+            </button>
+            <button class="tab-btn" onclick="switchTab('config')">
+                <i class="fas fa-code"></i> Config Analyzer
+            </button>
+        </div>
+        
+        <!-- Tab 1: Network Scanner -->
+        <div id="network-tab" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-search"></i> Network Discovery</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label class="input-label">
+                                <span><i class="fas fa-globe"></i> IP Range (CIDR)</span>
+                                <span class="quick-chip" onclick="setNetwork('192.168.1.0/24')">Home Network</span>
+                            </label>
+                            <input type="text" id="networkInput" class="input-field" placeholder="192.168.1.0/24" value="192.168.1.0/24">
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <span class="quick-chip" onclick="setNetwork('10.0.0.0/24')">10.0.0.0/24</span>
+                            <span class="quick-chip" onclick="setNetwork('172.16.0.0/24')">172.16.0.0/24</span>
+                            <span class="quick-chip" onclick="setNetwork('scanme.nmap.org/32')">ScanMe.org</span>
+                        </div>
+                        
+                        <button class="btn-primary" onclick="scanNetwork()">
+                            <i class="fas fa-play"></i> Start Network Scan
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-line"></i> Scan Results</h3>
+                    </div>
+                    <div class="card-body" id="networkResults">
+                        <div class="empty-state">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <p>Enter an IP range and click "Start Network Scan"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Config Analyzer -->
+        <div id="config-tab" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-terminal"></i> Cisco Configuration</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label class="input-label">
+                                <span><i class="fas fa-file-code"></i> Running-Config</span>
+                                <span class="quick-chip" onclick="loadSampleConfig('insecure')">Load Insecure</span>
+                                <span class="quick-chip" onclick="loadSampleConfig('secure')">Load Secure</span>
+                            </label>
+                            <textarea id="configInput" class="input-field" placeholder="Paste Cisco running-config here...&#10;&#10;Example:&#10;hostname R1&#10;line vty 0 4&#10; password cisco&#10; transport input telnet"></textarea>
+                        </div>
+                        
+                        <button class="btn-primary" onclick="analyzeConfig()">
+                            <i class="fas fa-brain"></i> Analyze with AI
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-chart-pie"></i> Security Analysis</h3>
+                    </div>
+                    <div class="card-body" id="configResults">
+                        <div class="empty-state">
+                            <i class="fas fa-shield-alt"></i>
+                            <p>Paste a Cisco config and click "Analyze with AI"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <i class="fas fa-shield-alt"></i> AI Unified Security Platform | Powered by Google Gemini 2.5 Flash | Cisco Network Security
+        </div>
+    </div>
+    
+    <script>
+        let scoreChart = null;
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'network') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('network-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('config-tab').classList.add('active');
+            }
+        }
+        
+        function setNetwork(network) {
+            document.getElementById('networkInput').value = network;
+        }
+        
+        async function scanNetwork() {
+            const network = document.getElementById('networkInput').value;
+            const resultsDiv = document.getElementById('networkResults');
+            
+            if (!network) {
+                resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Please enter a network range</p></div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Scanning network... This may take a moment</p></div>';
+            
+            try {
+                const response = await fetch('/scan-network', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ network: network })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.results) {
+                    const devices = Object.keys(data.results);
+                    if (devices.length === 0) {
+                        resultsDiv.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle" style="color: #10b981;"></i><p>No open ports found on the network</p></div>';
+                    } else {
+                        let html = `<div class="score-card"><div class="score-number">${devices.length}</div><div>Devices Found</div></div>`;
+                        for (const ip of devices) {
+                            html += `<div class="device-item">
+                                <div class="device-ip"><i class="fas fa-server"></i> ${ip}</div>
+                                <div>`;
+                            for (const port of data.results[ip]) {
+                                html += `<span class="port-badge">${port.port} (${port.service})</span>`;
+                            }
+                            html += `</div></div>`;
+                        }
+                        resultsDiv.innerHTML = html;
+                    }
+                } else {
+                    resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i><p>${data.error || 'Scan failed'}</p></div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i><p>Error connecting to server</p></div>`;
+            }
+        }
+        
+        async function analyzeConfig() {
+            const config = document.getElementById('configInput').value;
+            const resultsDiv = document.getElementById('configResults');
+            
+            if (!config.trim()) {
+                resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Please paste a Cisco config</p></div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>AI is analyzing your configuration...</p></div>';
+            
+            try {
+                const response = await fetch('/analyze-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ config: config })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.results) {
+                    const r = data.results;
+                    const riskClass = `risk-${r.risk_level.toLowerCase()}`;
+                    
+                    let html = `
+                        <div class="score-card">
+                            <div class="score-number">${r.score}/100</div>
+                            <div><span class="risk-badge ${riskClass}">${r.risk_level.toUpperCase()} RISK</span></div>
+                        </div>
+                    `;
+                    
+                    if (r.violations && r.violations.length > 0) {
+                        for (const v of r.violations) {
+                            const severityClass = `violation-${v.severity.toLowerCase()}`;
+                            html += `
+                                <div class="violation-item ${severityClass}">
+                                    <div class="violation-title">${v.severity.toUpperCase()}</div>
+                                    <div class="violation-issue">${v.issue}</div>
+                                    <div class="violation-fix">🔧 ${v.fix.replace(/\n/g, '<br>')}</div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        html += `<div class="empty-state"><i class="fas fa-check-circle" style="color: #10b981;"></i><p>No security violations found</p></div>`;
+                    }
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i><p>${data.error || 'Analysis failed'}</p></div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i><p>Error connecting to server</p></div>`;
+            }
+        }
+        
+        function loadSampleConfig(type) {
+            const insecureConfig = `hostname R1
+!
+line vty 0 4
+ password cisco
+ transport input telnet
+!
+ip http-server
+!
+no service password-encryption
+!
+snmp-server community public RO
+!
+cdp run
+!
+enable password admin`;
+            
+            const secureConfig = `hostname R1
+!
+line vty 0 4
+ transport input ssh
+ login local
+!
+ip http secure-server
+no ip http-server
+!
+service password-encryption
+!
+snmp-server community SecureString123 RW
+!
+no cdp run
+!
+enable secret Cisco@2024!Secure
+!
+logging 192.168.1.100
+!
+banner motd ^C Authorized Access Only ^C`;
+            
+            document.getElementById('configInput').value = type === 'insecure' ? insecureConfig : secureConfig;
+        }
+    </script>
+</body>
+</html>
