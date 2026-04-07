@@ -31,7 +31,7 @@ Paste any Cisco running-config → AI instantly tells you:
 
 ## 🎥 Live Demo Video
 
-[Watch Demo Video]()
+[Watch Demo Video](https://www.youtube.com/watch?v=nFqxgGu60UI)
 
 ---
 
