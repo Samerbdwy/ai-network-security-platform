@@ -24,7 +24,7 @@ Paste any Cisco running-config → AI instantly tells you:
 
 - Python + Flask (backend)
 - Google Gemini 2.5 Flash (AI)
-- HTML/CSS (professional dark-theme dashboard)
+- HTML/CSS & Javascript (professional dark-theme dashboard)
 - Socket programming (port scanning)
 
 ---
